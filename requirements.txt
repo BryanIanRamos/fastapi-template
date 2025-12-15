@@ -3,6 +3,6 @@ uvicorn[standard]==0.30.5
 SQLAlchemy==2.0.36
 alembic==1.13.2
 pydantic-settings==2.6.1
-pydantic[email]==2.6.1
+pydantic[email]==2.7.0
 python-dotenv==1.0.1
-passlib[bcrypt]==1.7.4
+passlib[bcrypt]==1.7.4psycopg2-binary==2.9.9
