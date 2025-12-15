@@ -7,7 +7,7 @@ from alembic import context
 
 # Import your app's models here
 from app.db.base import Base
-from app.models import user  # Import all your models
+from app.models import user, task  # Import all your models
 from app.core.config import settings
 
 # this is the Alembic Config object, which provides

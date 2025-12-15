@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
+from app.core.security import hash_password, verify_password
 
 
 class UserService:
@@ -25,7 +26,7 @@ class UserService:
 
     @staticmethod
     def create_user(db: Session, user_in: UserCreate) -> User:
-        """Create a new user"""
+        """Create a new user with hashed password"""
         # Check if user already exists
         existing_user = UserService.get_user_by_email(db, user_in.email)
         if existing_user:
@@ -38,7 +39,7 @@ class UserService:
             db_user = User(
                 email=user_in.email,
                 full_name=user_in.full_name,
-                hashed_password=user_in.password,  # In production, hash the password
+                hashed_password=hash_password(user_in.password),  # Auto-hash password
             )
             db.add(db_user)
             db.commit()
@@ -50,6 +51,16 @@ class UserService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Error creating user",
             )
+
+    @staticmethod
+    def authenticate_user(db: Session, email: str, password: str) -> User | None:
+        """Authenticate user by email and password"""
+        user = UserService.get_user_by_email(db, email)
+        if not user:
+            return None
+        if not verify_password(password, user.hashed_password):
+            return None
+        return user
 
     @staticmethod
     def update_user(db: Session, user_id: int, user_in: UserUpdate) -> User:
