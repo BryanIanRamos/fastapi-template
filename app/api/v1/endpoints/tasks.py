@@ -115,3 +115,39 @@ def delete_task(
     """
     TaskService.delete(db, task_id, current_user.id)
     return None
+
+
+# ============================================================================
+# FORM-DATA ALTERNATIVE EXAMPLE
+# ============================================================================
+# If you want to accept form-data instead of JSON, use this pattern:
+#
+# from fastapi import Form
+#
+# @router.post("/form", response_model=TaskRead, status_code=status.HTTP_201_CREATED)
+# def create_task_form(
+#     title: str = Form(...),              # Required form field
+#     description: str = Form(None),       # Optional form field
+#     status: str = Form("pending"),       # Form field with default value
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_user),
+# ):
+#     """
+#     Create a new task using FORM DATA
+#     
+#     This accepts multipart/form-data instead of application/json
+#     """
+#     # Convert form fields to Pydantic schema
+#     task_in = TaskCreate(
+#         title=title,
+#         description=description,
+#         status=status
+#     )
+#     # Use the same service method
+#     task = TaskService.create(db, task_in, current_user.id)
+#     return task
+#
+# Usage in Postman/Thunder Client:
+# - Set Body type to "form-data"
+# - Add fields: title, description, status
+# - Don't forget Authorization header with Bearer token
