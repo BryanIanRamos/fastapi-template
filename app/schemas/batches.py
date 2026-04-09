@@ -1,0 +1,33 @@
+from datetime import date
+from uuid import UUID
+
+from pydantic import BaseModel
+
+
+class BatchBase(BaseModel):
+    date_started: date
+    date_count: date
+    male_count: int = 0
+    female_count: int = 0
+    total_population: int = 0
+    status: str
+
+
+class BatchCreate(BatchBase):
+    pass
+
+
+class BatchUpdate(BaseModel):
+    date_started: date | None = None
+    date_count: date | None = None
+    male_count: int | None = None
+    female_count: int | None = None
+    total_population: int | None = None
+    status: str | None = None
+
+
+class BatchRead(BatchBase):
+    batch_id: UUID
+
+    class Config:
+        from_attributes = True

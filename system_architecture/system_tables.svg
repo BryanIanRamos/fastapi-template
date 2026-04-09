@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">
+  <defs>
+    <style>
+      .title { font: 700 18px Arial, sans-serif; fill: #0f172a; }
+      .tableTitle { font: 700 14px Arial, sans-serif; fill: #111827; }
+      .cols { font: 12px Arial, sans-serif; fill: #1f2937; }
+      .box { fill: #f8fafc; stroke: #334155; stroke-width: 1.5; rx: 8; }
+      .line { stroke: #0ea5e9; stroke-width: 2; fill: none; }
+      .label { font: 11px Arial, sans-serif; fill: #0369a1; }
+    </style>
+  </defs>
+
+  <text x="20" y="32" class="title">System Architecture - Table Structure</text>
+
+  <rect x="40" y="70" width="320" height="240" class="box"/>
+  <text x="52" y="94" class="tableTitle">users</text>
+  <text x="52" y="116" class="cols">user_id (UUID, PK)</text>
+  <text x="52" y="134" class="cols">email (varchar100)</text>
+  <text x="52" y="152" class="cols">password (varchar100)</text>
+  <text x="52" y="170" class="cols">vertified_at (datetime)</text>
+  <text x="52" y="188" class="cols">created_at (datetime)</text>
+  <text x="52" y="206" class="cols">role (int)</text>
+  <text x="52" y="224" class="cols">admin (UUID, FK users)</text>
+  <text x="52" y="242" class="cols">acad_info_id (UUID)</text>
+  <text x="52" y="260" class="cols">forwarded_by (UUID, FK users)</text>
+
+  <rect x="420" y="70" width="280" height="165" class="box"/>
+  <text x="432" y="94" class="tableTitle">tokens</text>
+  <text x="432" y="116" class="cols">token_id (UUID, PK)</text>
+  <text x="432" y="134" class="cols">value (varchar100)</text>
+  <text x="432" y="152" class="cols">expired_at (datetime)</text>
+  <text x="432" y="170" class="cols">created_at (datetime)</text>
+  <text x="432" y="188" class="cols">user_id (UUID, FK users)</text>
+
+  <rect x="420" y="270" width="320" height="175" class="box"/>
+  <text x="432" y="294" class="tableTitle">activity_log</text>
+  <text x="432" y="316" class="cols">log_id (UUID, PK)</text>
+  <text x="432" y="334" class="cols">user_name (varchar100)</text>
+  <text x="432" y="352" class="cols">user_role (int)</text>
+  <text x="432" y="370" class="cols">module (varchar)</text>
+  <text x="432" y="388" class="cols">recorded (varchar)</text>
+  <text x="432" y="406" class="cols">happended_at (datetime)</text>
+  <text x="432" y="424" class="cols">user_id (UUID, FK users)</text>
+
+  <rect x="40" y="360" width="300" height="170" class="box"/>
+  <text x="52" y="384" class="tableTitle">batch</text>
+  <text x="52" y="406" class="cols">batch_id (UUID, PK)</text>
+  <text x="52" y="424" class="cols">date_started (date)</text>
+  <text x="52" y="442" class="cols">date_count (date)</text>
+  <text x="52" y="460" class="cols">male_count (int)</text>
+  <text x="52" y="478" class="cols">female_count (int)</text>
+  <text x="52" y="496" class="cols">total_population (int)</text>
+  <text x="52" y="514" class="cols">status (string)</text>
+
+  <rect x="40" y="560" width="520" height="330" class="box"/>
+  <text x="52" y="584" class="tableTitle">biological_assets</text>
+  <text x="52" y="606" class="cols">bio_assets_id (string, PK), description (string), begin_qty (int)</text>
+  <text x="52" y="624" class="cols">begin_fair_val (int), purchase_qty (int), purchase_fair_val (decimal)</text>
+  <text x="52" y="642" class="cols">birth_qty (int), birth_fair_val (decimal)</text>
+  <text x="52" y="660" class="cols">add_change_qty (int), add_change_fair_val (decimal)</text>
+  <text x="52" y="678" class="cols">sale_qty (int), sale_fair_val (decimal)</text>
+  <text x="52" y="696" class="cols">death_qty (int), death_fair_val (decimal)</text>
+  <text x="52" y="714" class="cols">deduction_changes_qty (int), deduction_change_fair_value (decimal)</text>
+  <text x="52" y="732" class="cols">remarks (string), record_date (date)</text>
+  <text x="52" y="750" class="cols">created_at (datetime), updated_at (datetime)</text>
+  <text x="52" y="768" class="cols">batch_id (UUID, FK batch)</text>
+
+  <rect x="860" y="560" width="330" height="200" class="box"/>
+  <text x="872" y="584" class="tableTitle">equipments</text>
+  <text x="872" y="606" class="cols">equipment_id (UUID, PK)</text>
+  <text x="872" y="624" class="cols">name (string), description (string)</text>
+  <text x="872" y="642" class="cols">quantity (int), unit_value (decimal)</text>
+  <text x="872" y="660" class="cols">tiotal_value (decimal)</text>
+  <text x="872" y="678" class="cols">status (string), date_aquired (date)</text>
+  <text x="872" y="696" class="cols">remarks (string)</text>
+
+  <rect x="1240" y="560" width="320" height="190" class="box"/>
+  <text x="1252" y="584" class="tableTitle">equipment_transaction</text>
+  <text x="1252" y="606" class="cols">equipment_trans_id (UUID, PK)</text>
+  <text x="1252" y="624" class="cols">type (string), quantity (int)</text>
+  <text x="1252" y="642" class="cols">transaction_date (date)</text>
+  <text x="1252" y="660" class="cols">remarks (string)</text>
+  <text x="1252" y="678" class="cols">quipment_id (UUID, FK equipments)</text>
+
+  <path d="M360 150 L420 150" class="line"/>
+  <text x="370" y="142" class="label">users.user_id -> tokens.user_id</text>
+
+  <path d="M360 230 L420 360" class="line"/>
+  <text x="360" y="302" class="label">users.user_id -> activity_log.user_id</text>
+
+  <path d="M190 530 L190 560" class="line"/>
+  <text x="198" y="548" class="label">batch.batch_id -> biological_assets.batch_id</text>
+
+  <path d="M1190 655 L1240 655" class="line"/>
+  <text x="1160" y="646" class="label">equipments.equipment_id -> equipment_transaction.quipment_id</text>
+</svg>

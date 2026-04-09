@@ -8,6 +8,16 @@ from alembic import context
 # Import your app's models here
 from app.db.base import Base
 from app.models import user, task  # Import all your models
+from app.models.custom_base import SystemBase
+from app.models import (  # noqa: F401
+    users,
+    tokens,
+    activity_logs,
+    batches,
+    biological_assets,
+    equipments,
+    equipment_transactions,
+)
 from app.core.config import settings
 
 # this is the Alembic Config object, which provides
@@ -24,7 +34,7 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
-target_metadata = Base.metadata
+target_metadata = [Base.metadata, SystemBase.metadata]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
