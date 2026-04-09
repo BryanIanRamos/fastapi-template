@@ -62,6 +62,9 @@ htmlcov/
 *.log
 logs/
 
+# Local architecture docs
+system_architecture/
+
 # OS
 .DS_Store
 Thumbs.db
