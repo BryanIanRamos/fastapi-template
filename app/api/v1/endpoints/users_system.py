@@ -25,10 +25,8 @@ class CreateUserRequest(BaseModel):
 class UpdateUserRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
     
-    fullName: str | None = None
     email: EmailStr | None = None
     role: str | None = None
-    position: str | None = None
 
 
 def _role_to_int(role: str) -> int:

@@ -42,8 +42,26 @@ model_config = ConfigDict(extra='forbid')
     
     
 class BiologicalAssetUpdateRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     description: str | None = None
+    beginQty: int | None = None
+    beginFairVal: float | None = None
+    purchaseQty: int | None = None
+    purchaseFairVal: float | None = None
+    birthQty: int | None = None
+    birthFairVal: float | None = None
+    addChangeQty: int | None = None
+    addChangeFairVal: float | None = None
+    saleQty: int | None = None
+    saleFairVal: float | None = None
+    deathQty: int | None = None
+    deathFairVal: float | None = None
+    deductionChangesQty: int | None = None
+    deductionChangeFairValue: float | None = None
     remarks: str | None = None
+    recordDate: str | None = None
+    batchId: str | None = None
 
 
 def _to_payload(item: BiologicalAsset) -> dict:
@@ -186,19 +204,66 @@ def update_biological_asset(
     db: Session = Depends(get_db),
     _: SystemUser = Depends(get_current_system_user),
 ):
+    from datetime import date
+    
     row = db.query(BiologicalAsset).filter(BiologicalAsset.bio_assets_id == bio_id).first()
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Biological asset not found")
 
+    # Update all provided fields
     if payload.description is not None:
         row.description = payload.description
+    if payload.beginQty is not None:
+        row.begin_qty = payload.beginQty
+    if payload.beginFairVal is not None:
+        row.begin_fair_val = payload.beginFairVal
+    if payload.purchaseQty is not None:
+        row.purchase_qty = payload.purchaseQty
+    if payload.purchaseFairVal is not None:
+        row.purchase_fair_val = payload.purchaseFairVal
+    if payload.birthQty is not None:
+        row.birth_qty = payload.birthQty
+    if payload.birthFairVal is not None:
+        row.birth_fair_val = payload.birthFairVal
+    if payload.addChangeQty is not None:
+        row.add_change_qty = payload.addChangeQty
+    if payload.addChangeFairVal is not None:
+        row.add_change_fair_val = payload.addChangeFairVal
+    if payload.saleQty is not None:
+        row.sale_qty = payload.saleQty
+    if payload.saleFairVal is not None:
+        row.sale_fair_val = payload.saleFairVal
+    if payload.deathQty is not None:
+        row.death_qty = payload.deathQty
+    if payload.deathFairVal is not None:
+        row.death_fair_val = payload.deathFairVal
+    if payload.deductionChangesQty is not None:
+        row.deduction_changes_qty = payload.deductionChangesQty
+    if payload.deductionChangeFairValue is not None:
+        row.deduction_change_fair_value = payload.deductionChangeFairValue
     if payload.remarks is not None:
         row.remarks = payload.remarks
+    if payload.recordDate is not None:
+        row.record_date = date.fromisoformat(payload.recordDate)
+    if payload.batchId is not None:
+        row.batch_id = payload.batchId
 
-    db.add(row)
-    db.commit()
-    db.refresh(row)
-    return success_response("Updated", _to_payload(row))
+    try:
+        db.add(row)
+        db.commit()
+        db.refresh(row)
+        return success_response("Updated", _to_payload(row))
+    except IntegrityError as e:
+        db.rollback()
+        if "batch" in str(e.orig).lower():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid batch ID. The specified batch does not exist"
+            )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Failed to update biological asset due to constraint violation"
+        )
 
 
 @router.delete("/{bio_id}")
