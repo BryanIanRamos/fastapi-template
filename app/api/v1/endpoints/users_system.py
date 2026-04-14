@@ -36,7 +36,7 @@ def _int_to_role(role: int) -> str:
 
 
 def _status(user: SystemUser) -> str:
-    return "active" if user.vertified_at else "pending-email"
+    return "active" if user.verified_at else "pending-email"
 
 
 def _user_payload(user: SystemUser) -> dict:
@@ -69,9 +69,9 @@ def list_users(
     if role:
         query = query.filter(SystemUser.role == _role_to_int(role))
     if status_filter == "active":
-        query = query.filter(SystemUser.vertified_at.isnot(None))
+        query = query.filter(SystemUser.verified_at.isnot(None))
     elif status_filter == "pending-email":
-        query = query.filter(SystemUser.vertified_at.is_(None))
+        query = query.filter(SystemUser.verified_at.is_(None))
 
     total = query.count()
     items = (
@@ -153,7 +153,7 @@ def verify_user(user_id: uuid.UUID, db: Session = Depends(get_db), _: SystemUser
 
     from datetime import datetime
 
-    user.vertified_at = datetime.utcnow()
+    user.verified_at = datetime.utcnow()
     db.add(user)
     db.commit()
     db.refresh(user)

@@ -89,6 +89,7 @@ def login(payload: LoginRequest, db: Session = Depends(get_db)):
     refresh_token = str(uuid.uuid4())
 
     db_token = SystemToken(
+        token_type="refresh",
         value=refresh_token,
         expired_at=datetime.utcnow() + timedelta(days=7),
         user_id=user.user_id,
@@ -124,6 +125,7 @@ def forgot_password(payload: ForgotPasswordRequest, db: Session = Depends(get_db
     if user:
         reset_token = str(uuid.uuid4())
         db_token = SystemToken(
+            token_type="reset",
             value=reset_token,
             expired_at=datetime.utcnow() + timedelta(hours=1),
             user_id=user.user_id,

@@ -14,13 +14,13 @@ class SystemUserBase(BaseModel):
 
 class SystemUserCreate(SystemUserBase):
     password: str
-    vertified_at: datetime | None = None
+    verified_at: datetime | None = None
 
 
 class SystemUserUpdate(BaseModel):
     email: EmailStr | None = None
     password: str | None = None
-    vertified_at: datetime | None = None
+    verified_at: datetime | None = None
     role: int | None = None
     admin: UUID | None = None
     acad_info_id: UUID | None = None
@@ -29,7 +29,7 @@ class SystemUserUpdate(BaseModel):
 
 class SystemUserRead(SystemUserBase):
     user_id: UUID
-    vertified_at: datetime | None
+    verified_at: datetime | None
     created_at: datetime
 
     class Config:

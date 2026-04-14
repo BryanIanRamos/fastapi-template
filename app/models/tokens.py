@@ -10,6 +10,7 @@ class SystemToken(SystemBase):
     __tablename__ = "tokens"
 
     token_id = Column(Uuid, primary_key=True, default=uuid.uuid4)
+    token_type = Column(String(50), nullable=False, default="refresh")
     value = Column(String(100), nullable=False)
     expired_at = Column(DateTime(timezone=True), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
