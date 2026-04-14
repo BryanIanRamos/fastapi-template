@@ -1,7 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
@@ -14,6 +14,8 @@ router = APIRouter()
 
 
 class EquipmentCreateRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     name: str
     description: str | None = None
     quantity: int = 0
@@ -25,6 +27,8 @@ class EquipmentCreateRequest(BaseModel):
 
 
 class EquipmentUpdateRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     name: str | None = None
     description: str | None = None
     quantity: int | None = None

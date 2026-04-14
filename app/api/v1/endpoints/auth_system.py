@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
@@ -18,15 +18,21 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login
 
 
 class LoginRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     email: EmailStr
     password: str
 
 
 class ForgotPasswordRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     email: EmailStr
 
 
 class ResetPasswordRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     token: str
     newPassword: str
 

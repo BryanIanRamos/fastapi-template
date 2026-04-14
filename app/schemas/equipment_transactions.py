@@ -1,7 +1,7 @@
 from datetime import date
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class EquipmentTransactionBase(BaseModel):
@@ -13,10 +13,12 @@ class EquipmentTransactionBase(BaseModel):
 
 
 class EquipmentTransactionCreate(EquipmentTransactionBase):
-    pass
+    model_config = ConfigDict(extra='forbid')
 
 
 class EquipmentTransactionUpdate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     type: str | None = None
     quantity: int | None = None
     transaction_date: date | None = None

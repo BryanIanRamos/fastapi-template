@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ActivityLogBase(BaseModel):
@@ -13,10 +13,14 @@ class ActivityLogBase(BaseModel):
 
 
 class ActivityLogCreate(ActivityLogBase):
+    model_config = ConfigDict(extra='forbid')
+    
     happended_at: datetime | None = None
 
 
 class ActivityLogUpdate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     user_name: str | None = None
     user_role: int | None = None
     module: str | None = None

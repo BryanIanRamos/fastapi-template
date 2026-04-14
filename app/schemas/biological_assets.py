@@ -2,7 +2,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class BiologicalAssetBase(BaseModel):
@@ -27,10 +27,14 @@ class BiologicalAssetBase(BaseModel):
 
 
 class BiologicalAssetCreate(BiologicalAssetBase):
+    model_config = ConfigDict(extra='forbid')
+    
     bio_assets_id: str
 
 
 class BiologicalAssetUpdate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     description: str | None = None
     begin_qty: int | None = None
     begin_fair_val: Decimal | None = None

@@ -1,7 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
@@ -14,6 +14,8 @@ router = APIRouter()
 
 
 class BatchCreateRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     dateStarted: str
     dateCount: str
     maleCount: int = 0
@@ -23,6 +25,8 @@ class BatchCreateRequest(BaseModel):
 
 
 class BatchUpdateRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     dateStarted: str | None = None
     dateCount: str | None = None
     maleCount: int | None = None

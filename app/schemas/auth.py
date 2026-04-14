@@ -1,14 +1,18 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class UserLogin(BaseModel):
     """User login schema"""
+    model_config = ConfigDict(extra='forbid')
+    
     email: EmailStr
     password: str
 
 
 class UserRegister(BaseModel):
     """User registration schema"""
+    model_config = ConfigDict(extra='forbid')
+    
     email: EmailStr
     password: str
     full_name: str | None = None

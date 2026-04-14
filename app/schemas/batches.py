@@ -1,7 +1,7 @@
 from datetime import date
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class BatchBase(BaseModel):
@@ -14,10 +14,12 @@ class BatchBase(BaseModel):
 
 
 class BatchCreate(BatchBase):
-    pass
+    model_config = ConfigDict(extra='forbid')
 
 
 class BatchUpdate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     date_started: date | None = None
     date_count: date | None = None
     male_count: int | None = None

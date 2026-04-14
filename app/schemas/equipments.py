@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class EquipmentBase(BaseModel):
@@ -17,10 +17,12 @@ class EquipmentBase(BaseModel):
 
 
 class EquipmentCreate(EquipmentBase):
-    pass
+    model_config = ConfigDict(extra='forbid')
 
 
 class EquipmentUpdate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     name: str | None = None
     description: str | None = None
     quantity: int | None = None

@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class SystemTokenBase(BaseModel):
@@ -11,10 +11,12 @@ class SystemTokenBase(BaseModel):
 
 
 class SystemTokenCreate(SystemTokenBase):
-    pass
+    model_config = ConfigDict(extra='forbid')
 
 
 class SystemTokenUpdate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     value: str | None = None
     expired_at: datetime | None = None
 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 from datetime import datetime
 
 
@@ -10,11 +10,15 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     """User creation schema"""
+    model_config = ConfigDict(extra='forbid')
+    
     password: str
 
 
 class UserUpdate(BaseModel):
     """User update schema"""
+    model_config = ConfigDict(extra='forbid')
+    
     email: EmailStr | None = None
     full_name: str | None = None
 

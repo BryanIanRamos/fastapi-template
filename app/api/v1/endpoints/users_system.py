@@ -1,7 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
@@ -14,6 +14,8 @@ router = APIRouter()
 
 
 class CreateUserRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     fullName: str
     email: EmailStr
     role: str
@@ -21,6 +23,8 @@ class CreateUserRequest(BaseModel):
 
 
 class UpdateUserRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     fullName: str | None = None
     email: EmailStr | None = None
     role: str | None = None

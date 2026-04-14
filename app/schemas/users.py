@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class SystemUserBase(BaseModel):
@@ -13,11 +13,15 @@ class SystemUserBase(BaseModel):
 
 
 class SystemUserCreate(SystemUserBase):
+    model_config = ConfigDict(extra='forbid')
+    
     password: str
     verified_at: datetime | None = None
 
 
 class SystemUserUpdate(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     email: EmailStr | None = None
     password: str | None = None
     verified_at: datetime | None = None

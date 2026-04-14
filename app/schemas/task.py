@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
 
@@ -11,11 +11,13 @@ class TaskBase(BaseModel):
 
 class TaskCreate(TaskBase):
     """Schema for creating a task"""
-    pass
+    model_config = ConfigDict(extra='forbid')
 
 
 class TaskUpdate(BaseModel):
     """Schema for updating a task - all fields optional"""
+    model_config = ConfigDict(extra='forbid')
+    
     title: str | None = None
     description: str | None = None
     status: str | None = None
