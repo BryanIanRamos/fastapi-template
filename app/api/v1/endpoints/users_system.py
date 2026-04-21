@@ -19,7 +19,6 @@ class CreateUserRequest(BaseModel):
     fullName: str
     email: EmailStr
     role: str
-    position: str
 
 
 class UpdateUserRequest(BaseModel):
@@ -46,8 +45,7 @@ def _user_payload(user: SystemUser) -> dict:
     return {
         "fullName": full_name,
         "email": user.email,
-        "role": _int_to_role(user.role),
-        "position": "N/A",
+        "role": user.role,
         "status": _status(user),
         "createdAt": user.created_at.isoformat() if user.created_at else None,
     }

@@ -45,9 +45,8 @@ def _user_payload(user: SystemUser) -> dict:
     full_name = user.email.split("@")[0].replace(".", " ").title()
     return {
         "fullName": full_name,
-        "position": "N/A",
         "email": user.email,
-        "role": _role_label(user.role),
+        "role": user.role,
     }
 
 
