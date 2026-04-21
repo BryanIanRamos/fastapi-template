@@ -1,6 +1,4 @@
-import uuid
-
-from sqlalchemy import Column, Date, Integer, String, Uuid
+from sqlalchemy import Column, Date, Integer, String
 from sqlalchemy.orm import relationship
 
 from app.models.custom_base import SystemBase
@@ -9,7 +7,7 @@ from app.models.custom_base import SystemBase
 class Batch(SystemBase):
     __tablename__ = "batch"
 
-    batch_id = Column(Uuid, primary_key=True, default=uuid.uuid4)
+    batch_id = Column(String(50), primary_key=True)
     date_started = Column(Date, nullable=False)
     date_count = Column(Date, nullable=False)
     male_count = Column(Integer, nullable=False, default=0)

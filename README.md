@@ -90,6 +90,68 @@ alembic upgrade head
 alembic downgrade -1
 ```
 
+### Migration Guide (PostgreSQL)
+
+Use this flow whenever you change model datatypes (example: UUID to String).
+
+1. Update your SQLAlchemy models first.
+2. Generate migration from model changes.
+3. Apply migration.
+4. Verify current revision.
+
+```powershell
+# 1) Generate migration from model changes
+.\.venv\Scripts\python.exe -m alembic revision -m "update_column_types" --autogenerate
+
+# 2) Apply migration
+.\.venv\Scripts\python.exe -m alembic upgrade head
+
+# 3) Verify current revision
+.\.venv\Scripts\python.exe -m alembic current
+```
+
+If you need to rebuild the database from scratch (migrate fresh), use this.
+Warning: This removes all data in the public schema.
+
+```powershell
+# Recreate schema (fresh reset)
+$env:PYTHONPATH = (Get-Location).Path
+$py = @'
+from app.db.session import engine
+with engine.begin() as conn:
+    conn.exec_driver_sql("DROP SCHEMA IF EXISTS public CASCADE")
+    conn.exec_driver_sql("CREATE SCHEMA public")
+print("Recreated public schema.")
+'@
+$tmp = New-TemporaryFile
+Set-Content -Path $tmp -Value $py
+.\.venv\Scripts\python.exe $tmp
+Remove-Item $tmp
+
+# Run all migrations again
+.\.venv\Scripts\python.exe -m alembic upgrade head
+
+# Verify revision
+.\.venv\Scripts\python.exe -m alembic current
+```
+
+Optional check for specific column datatypes:
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+$py = @'
+from app.db.session import engine
+from sqlalchemy import text
+with engine.connect() as conn:
+    rows = conn.execute(text("select table_name, column_name, data_type from information_schema.columns where table_name in ('batch','biological_assets') and column_name='batch_id' order by table_name")).fetchall()
+    print(rows)
+'@
+$tmp = New-TemporaryFile
+Set-Content -Path $tmp -Value $py
+.\.venv\Scripts\python.exe $tmp
+Remove-Item $tmp
+```
+
 ## Architecture Layers
 
 1. **Controllers (api/v1/endpoints/)** - HTTP request handling

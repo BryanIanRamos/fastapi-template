@@ -55,7 +55,6 @@ def list_activity_logs(
             "module": item.module,
             "recorded": item.recorded,
             "happendedAt": item.happended_at.isoformat(),
-            "userId": str(item.user_id) if item.user_id else None,
         }
         for item in items
     ]
@@ -87,6 +86,5 @@ def create_activity_log(
             "module": row.module,
             "recorded": row.recorded,
             "happendedAt": row.happended_at.isoformat(),
-            "userId": str(row.user_id) if row.user_id else None,
         },
     )

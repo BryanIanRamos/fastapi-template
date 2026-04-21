@@ -1,6 +1,5 @@
 from datetime import date, datetime
 from decimal import Decimal
-from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
@@ -23,7 +22,7 @@ class BiologicalAssetBase(BaseModel):
     deduction_change_fair_value: Decimal = Decimal("0")
     remarks: str | None = None
     record_date: date
-    batch_id: UUID
+    batch_id: str
 
 
 class BiologicalAssetCreate(BiologicalAssetBase):
@@ -52,7 +51,7 @@ class BiologicalAssetUpdate(BaseModel):
     deduction_change_fair_value: Decimal | None = None
     remarks: str | None = None
     record_date: date | None = None
-    batch_id: UUID | None = None
+    batch_id: str | None = None
 
 
 class BiologicalAssetRead(BiologicalAssetBase):

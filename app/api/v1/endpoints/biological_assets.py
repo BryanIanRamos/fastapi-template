@@ -86,7 +86,7 @@ def _to_payload(item: BiologicalAsset) -> dict:
         "recordDate": item.record_date.isoformat(),
         "createdAt": item.created_at.isoformat() if item.created_at else None,
         "updatedAt": item.updated_at.isoformat() if item.updated_at else None,
-        "batchId": str(item.batch_id),
+        "batchId": item.batch_id,
     }
 
 

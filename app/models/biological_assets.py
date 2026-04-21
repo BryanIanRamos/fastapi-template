@@ -27,6 +27,6 @@ class BiologicalAsset(SystemBase):
     record_date = Column(Date, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
-    batch_id = Column(Uuid, ForeignKey("batch.batch_id"), nullable=False, index=True)
+    batch_id = Column(String(50), ForeignKey("batch.batch_id"), nullable=False, index=True)
 
     batch = relationship("Batch", back_populates="biological_assets")

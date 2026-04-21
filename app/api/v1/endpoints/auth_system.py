@@ -44,7 +44,6 @@ def _role_label(role_value: int) -> str:
 def _user_payload(user: SystemUser) -> dict:
     full_name = user.email.split("@")[0].replace(".", " ").title()
     return {
-        "id": str(user.user_id),
         "fullName": full_name,
         "position": "N/A",
         "email": user.email,

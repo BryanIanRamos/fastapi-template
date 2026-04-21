@@ -1,5 +1,4 @@
 from datetime import date
-from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
@@ -29,7 +28,7 @@ class BatchUpdate(BaseModel):
 
 
 class BatchRead(BatchBase):
-    batch_id: UUID
+    batch_id: str
 
     class Config:
         from_attributes = True

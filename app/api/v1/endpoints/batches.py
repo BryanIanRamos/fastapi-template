@@ -1,4 +1,4 @@
-import uuid
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, ConfigDict
@@ -11,6 +11,25 @@ from app.models.batches import Batch
 from app.models.users import SystemUser
 
 router = APIRouter()
+
+
+def _generate_batch_id(db: Session) -> str:
+    """Generate a unique batch ID in the format BATCH-YYYY-MM."""
+    now = datetime.utcnow()
+    year_month = now.strftime("%Y-%m")
+
+    base_id = f"BATCH-{year_month}"
+    exists = db.query(Batch).filter(Batch.batch_id == base_id).first()
+    if not exists:
+        return base_id
+
+    # Keep the requested prefix and add a numeric suffix only when needed.
+    suffix = 2
+    while True:
+        candidate = f"{base_id}-{suffix:02d}"
+        if not db.query(Batch).filter(Batch.batch_id == candidate).first():
+            return candidate
+        suffix += 1
 
 
 class BatchCreateRequest(BaseModel):
@@ -51,7 +70,7 @@ def list_batches(
     items = query.order_by(Batch.date_started.desc()).offset((page - 1) * pageSize).limit(pageSize).all()
     data = [
         {
-            "batchId": str(item.batch_id),
+            "batchId": item.batch_id,
             "dateStarted": item.date_started.isoformat(),
             "dateCount": item.date_count.isoformat(),
             "maleCount": item.male_count,
@@ -68,7 +87,10 @@ def list_batches(
 def create_batch(payload: BatchCreateRequest, db: Session = Depends(get_db), _: SystemUser = Depends(get_current_system_user)):
     from datetime import date
 
+    batch_id = _generate_batch_id(db)
+    
     row = Batch(
+        batch_id=batch_id,
         date_started=date.fromisoformat(payload.dateStarted),
         date_count=date.fromisoformat(payload.dateCount),
         male_count=payload.maleCount,
@@ -82,7 +104,7 @@ def create_batch(payload: BatchCreateRequest, db: Session = Depends(get_db), _: 
     return success_response(
         "Created",
         {
-            "batchId": str(row.batch_id),
+            "batchId": row.batch_id,
             "dateStarted": row.date_started.isoformat(),
             "dateCount": row.date_count.isoformat(),
             "maleCount": row.male_count,
@@ -94,14 +116,14 @@ def create_batch(payload: BatchCreateRequest, db: Session = Depends(get_db), _: 
 
 
 @router.get("/{batch_id}")
-def get_batch(batch_id: uuid.UUID, db: Session = Depends(get_db), _: SystemUser = Depends(get_current_system_user)):
+def get_batch(batch_id: str, db: Session = Depends(get_db), _: SystemUser = Depends(get_current_system_user)):
     row = db.query(Batch).filter(Batch.batch_id == batch_id).first()
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Batch not found")
     return success_response(
         "OK",
         {
-            "batchId": str(row.batch_id),
+            "batchId": row.batch_id,
             "dateStarted": row.date_started.isoformat(),
             "dateCount": row.date_count.isoformat(),
             "maleCount": row.male_count,
@@ -114,7 +136,7 @@ def get_batch(batch_id: uuid.UUID, db: Session = Depends(get_db), _: SystemUser 
 
 @router.patch("/{batch_id}")
 def update_batch(
-    batch_id: uuid.UUID,
+    batch_id: str,
     payload: BatchUpdateRequest,
     db: Session = Depends(get_db),
     _: SystemUser = Depends(get_current_system_user),
@@ -141,15 +163,15 @@ def update_batch(
     db.add(row)
     db.commit()
     db.refresh(row)
-    return success_response("Batch updated", {"batchId": str(row.batch_id)})
+    return success_response("Batch updated", {"batchId": row.batch_id})
 
 
 @router.delete("/{batch_id}")
-def delete_batch(batch_id: uuid.UUID, db: Session = Depends(get_db), _: SystemUser = Depends(get_current_system_user)):
+def delete_batch(batch_id: str, db: Session = Depends(get_db), _: SystemUser = Depends(get_current_system_user)):
     row = db.query(Batch).filter(Batch.batch_id == batch_id).first()
     if row is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Batch not found")
 
     db.delete(row)
     db.commit()
-    return success_response("Batch deleted", {"batchId": str(batch_id)})
+    return success_response("Batch deleted", {"batchId": batch_id})

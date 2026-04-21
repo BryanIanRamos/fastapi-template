@@ -44,7 +44,6 @@ def _status(user: SystemUser) -> str:
 def _user_payload(user: SystemUser) -> dict:
     full_name = user.email.split("@")[0].replace(".", " ").title()
     return {
-        "id": str(user.user_id),
         "fullName": full_name,
         "email": user.email,
         "role": _int_to_role(user.role),
@@ -104,7 +103,6 @@ def create_user(payload: CreateUserRequest, db: Session = Depends(get_db), _: Sy
 
     data = _user_payload(user)
     data["temporaryPassword"] = temp_password
-    data["status"] = "pending-email"
     return success_response("User created", data)
 
 
@@ -144,7 +142,7 @@ def resend_invite(user_id: uuid.UUID, db: Session = Depends(get_db), _: SystemUs
     user = db.query(SystemUser).filter(SystemUser.user_id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    return success_response("Invite resent", {"id": str(user.user_id), "email": user.email})
+    return success_response("Invite resent", {"email": user.email})
 
 
 @router.patch("/{user_id}/verify")
