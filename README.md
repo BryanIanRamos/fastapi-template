@@ -156,11 +156,16 @@ Remove-Item $tmp
 
 The project includes a simple initializer in `app/db/init_db.py` that inserts a sample admin user when the `users` table is empty.
 
-Run seeder manually:
+Run seeder:
 
 ```powershell
-$env:PYTHONPATH = (Get-Location).Path
-.\.venv\Scripts\python.exe -c "from app.db.session import SessionLocal; from app.db.init_db import init_db; db=SessionLocal(); init_db(db); db.close(); print('Seeder executed')"
+.\.venv\Scripts\python.exe manage.py db:seed
+```
+
+Alternative short module command:
+
+```powershell
+.\.venv\Scripts\python.exe -m app.db.init_db
 ```
 
 Default sample credentials created by this seeder:
