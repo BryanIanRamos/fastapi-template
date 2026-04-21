@@ -37,10 +37,6 @@ class ResetPasswordRequest(BaseModel):
     newPassword: str
 
 
-def _role_label(role_value: int) -> str:
-    return "admin" if role_value == 1 else "field-personnel"
-
-
 def _user_payload(user: SystemUser) -> dict:
     full_name = user.email.split("@")[0].replace(".", " ").title()
     return {

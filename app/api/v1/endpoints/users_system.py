@@ -18,22 +18,14 @@ class CreateUserRequest(BaseModel):
     
     fullName: str
     email: EmailStr
-    role: str
+    role: int
 
 
 class UpdateUserRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
     
     email: EmailStr | None = None
-    role: str | None = None
-
-
-def _role_to_int(role: str) -> int:
-    return 1 if role == "admin" else 2
-
-
-def _int_to_role(role: int) -> str:
-    return "admin" if role == 1 else "field-personnel"
+    role: int | None = None
 
 
 def _status(user: SystemUser) -> str:
@@ -56,7 +48,7 @@ def list_users(
     page: int = Query(default=1, ge=1),
     pageSize: int = Query(default=20, ge=1, le=100),
     search: str | None = None,
-    role: str | None = None,
+    role: int | None = None,
     status_filter: str | None = Query(default=None, alias="status"),
     db: Session = Depends(get_db),
     _: SystemUser = Depends(get_current_system_user),
@@ -66,7 +58,7 @@ def list_users(
     if search:
         query = query.filter(SystemUser.email.ilike(f"%{search}%"))
     if role:
-        query = query.filter(SystemUser.role == _role_to_int(role))
+        query = query.filter(SystemUser.role == role)
     if status_filter == "active":
         query = query.filter(SystemUser.verified_at.isnot(None))
     elif status_filter == "pending-email":
@@ -93,7 +85,7 @@ def create_user(payload: CreateUserRequest, db: Session = Depends(get_db), _: Sy
     user = SystemUser(
         email=payload.email,
         password=hash_password(temp_password),
-        role=_role_to_int(payload.role),
+        role=payload.role,
     )
     db.add(user)
     db.commit()
@@ -126,7 +118,7 @@ def update_user(
     if payload.email is not None:
         user.email = payload.email
     if payload.role is not None:
-        user.role = _role_to_int(payload.role)
+        user.role = payload.role
 
     db.add(user)
     db.commit()
