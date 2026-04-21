@@ -28,6 +28,10 @@ class UpdateUserRequest(BaseModel):
     role: int | None = None
 
 
+def _int_to_role(role: int) -> str:
+    return "admin" if role == 1 else "field-personnel"
+
+
 def _status(user: SystemUser) -> str:
     return "active" if user.verified_at else "pending-email"
 
@@ -37,7 +41,7 @@ def _user_payload(user: SystemUser) -> dict:
     return {
         "fullName": full_name,
         "email": user.email,
-        "role": user.role,
+        "role": _int_to_role(user.role),
         "status": _status(user),
         "createdAt": user.created_at.isoformat() if user.created_at else None,
     }
