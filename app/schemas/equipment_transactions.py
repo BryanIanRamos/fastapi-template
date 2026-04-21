@@ -27,7 +27,7 @@ class EquipmentTransactionUpdate(BaseModel):
 
 
 class EquipmentTransactionRead(EquipmentTransactionBase):
-    equipment_trans_id: UUID
+    equipment_trans_id: str
 
     class Config:
         from_attributes = True
