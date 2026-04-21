@@ -42,7 +42,7 @@ def _int_to_role(role: int) -> str:
 
 
 def _user_payload(user: SystemUser) -> dict:
-    full_name = user.email.split("@")[0].replace(".", " ").title()
+    full_name = user.full_name or user.email.split("@")[0].replace(".", " ").title()
     return {
         "fullName": full_name,
         "email": user.email,

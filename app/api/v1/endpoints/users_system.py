@@ -24,6 +24,7 @@ class CreateUserRequest(BaseModel):
 class UpdateUserRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
     
+    fullName: str | None = None
     email: EmailStr | None = None
     role: int | None = None
 
@@ -37,7 +38,7 @@ def _status(user: SystemUser) -> str:
 
 
 def _user_payload(user: SystemUser) -> dict:
-    full_name = user.email.split("@")[0].replace(".", " ").title()
+    full_name = user.full_name or user.email.split("@")[0].replace(".", " ").title()
     return {
         "fullName": full_name,
         "email": user.email,
@@ -88,6 +89,7 @@ def create_user(payload: CreateUserRequest, db: Session = Depends(get_db), _: Sy
     temp_password = str(uuid.uuid4())[:10]
     user = SystemUser(
         email=payload.email,
+        full_name=payload.fullName,
         password=hash_password(temp_password),
         role=payload.role,
     )
@@ -119,6 +121,8 @@ def update_user(
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
+    if payload.fullName is not None:
+        user.full_name = payload.fullName
     if payload.email is not None:
         user.email = payload.email
     if payload.role is not None:
