@@ -11,6 +11,7 @@ class SystemUser(SystemBase):
 
     user_id = Column(Uuid, primary_key=True, default=uuid.uuid4)
     email = Column(String(100), nullable=False, unique=True, index=True)
+    full_name = Column(String(150), nullable=True)
     password = Column(String(100), nullable=False)
     verified_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
