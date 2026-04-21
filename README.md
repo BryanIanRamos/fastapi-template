@@ -152,6 +152,23 @@ Set-Content -Path $tmp -Value $py
 Remove-Item $tmp
 ```
 
+### Seeder (Sample Data)
+
+The project includes a simple initializer in `app/db/init_db.py` that inserts a sample admin user when the `users` table is empty.
+
+Run seeder manually:
+
+```powershell
+$env:PYTHONPATH = (Get-Location).Path
+.\.venv\Scripts\python.exe -c "from app.db.session import SessionLocal; from app.db.init_db import init_db; db=SessionLocal(); init_db(db); db.close(); print('Seeder executed')"
+```
+
+Default sample credentials created by this seeder:
+
+- Email: `admin@example.com`
+- Password: `admin123`
+- Role: `admin` (role = 1)
+
 ## Architecture Layers
 
 1. **Controllers (api/v1/endpoints/)** - HTTP request handling
