@@ -80,8 +80,14 @@ Server runs at: `http://localhost:8000`
 ## Database Migrations (Alembic)
 
 ```powershell
-# One-time Alembic setup (creates alembic/ and alembic.ini)
+# Ensure DATABASE_URL is set in .env before running Alembic
+# Example (Postgres): DATABASE_URL=postgresql+psycopg2://user:pass@localhost:5432/db
+
+# One-time Alembic setup (only if alembic/ does not exist yet)
 alembic init alembic
+
+# Re-init Alembic with the template env.py (safe after deleting alembic/)
+# .\scripts\setup_alembic.ps1 -Force
 
 # Create migration
 alembic revision -m "description" --autogenerate
@@ -113,7 +119,12 @@ alembic upgrade head
 ## Environment Variables
 
 ```env
-DATABASE_URL=sqlite:///./app.db    # Database connection string
+# SQLite (default)
+DATABASE_URL=sqlite:///./app.db
+
+# PostgreSQL (example)
+# DATABASE_URL=postgresql+psycopg2://postgres:password@localhost:5432/your_db
+
 API_V1_STR=/api/v1                 # API v1 prefix
 PROJECT_NAME=FastAPI Server        # Project name
 DEBUG=True                          # Debug mode
