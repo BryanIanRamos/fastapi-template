@@ -49,7 +49,7 @@ env/
 app.db
 
 # Alembic
-alembic/versions/*.py
+alembic/
 
 # Testing
 .pytest_cache/
