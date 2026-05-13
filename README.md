@@ -80,6 +80,9 @@ Server runs at: `http://localhost:8000`
 ## Database Migrations (Alembic)
 
 ```powershell
+# One-time Alembic setup (creates alembic/ and alembic.ini)
+alembic init alembic
+
 # Create migration
 alembic revision -m "description" --autogenerate
 
@@ -88,6 +91,14 @@ alembic upgrade head
 
 # Downgrade
 alembic downgrade -1
+
+# Fresh migrate (drops all tables, data loss)
+alembic downgrade base
+alembic upgrade head
+
+# Reset database schema (Postgres, data loss)
+psql "$env:DATABASE_URL" -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
+alembic upgrade head
 ```
 
 ## Architecture Layers
