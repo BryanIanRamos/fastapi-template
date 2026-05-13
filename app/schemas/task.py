@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
+from uuid import UUID
 
 
 class TaskBase(BaseModel):
@@ -24,7 +25,7 @@ class TaskUpdate(BaseModel):
 class TaskRead(TaskBase):
     """Schema for reading a task - includes DB fields"""
     id: int
-    user_id: int
+    user_id: UUID
     created_at: datetime
     updated_at: datetime
 

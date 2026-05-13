@@ -15,9 +15,9 @@ class UserService:
         return db.query(User).filter(User.email == email).first()
 
     @staticmethod
-    def get_user_by_id(db: Session, user_id: int) -> User | None:
+    def get_user_by_id(db: Session, user_id) -> User | None:
         """Get user by ID"""
-        return db.query(User).filter(User.id == user_id).first()
+        return db.query(User).filter(User.user_id == user_id).first()
 
     @staticmethod
     def get_all_users(db: Session, skip: int = 0, limit: int = 100) -> list[User]:
@@ -38,8 +38,10 @@ class UserService:
         try:
             db_user = User(
                 email=user_in.email,
-                full_name=user_in.full_name,
-                hashed_password=hash_password(user_in.password),  # Auto-hash password
+                username=user_in.username,
+                password=hash_password(user_in.password),
+                first_name=user_in.first_name,
+                last_name=user_in.last_name,
             )
             db.add(db_user)
             db.commit()
@@ -58,12 +60,12 @@ class UserService:
         user = UserService.get_user_by_email(db, email)
         if not user:
             return None
-        if not verify_password(password, user.hashed_password):
+        if not verify_password(password, user.password):
             return None
         return user
 
     @staticmethod
-    def update_user(db: Session, user_id: int, user_in: UserUpdate) -> User:
+    def update_user(db: Session, user_id, user_in: UserUpdate) -> User:
         """Update user by ID"""
         db_user = UserService.get_user_by_id(db, user_id)
         if not db_user:
@@ -89,7 +91,7 @@ class UserService:
             )
 
     @staticmethod
-    def delete_user(db: Session, user_id: int) -> bool:
+    def delete_user(db: Session, user_id) -> bool:
         """Delete user by ID"""
         db_user = UserService.get_user_by_id(db, user_id)
         if not db_user:

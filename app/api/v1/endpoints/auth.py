@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.schemas.auth import Token, UserLogin, UserRegister
 from app.schemas.user import UserRead
 from app.services.user_service import UserService
+from app.services.token_service import TokenService
 from app.models.user import User
 
 router = APIRouter()
@@ -26,6 +27,10 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    
+    # Check if token is revoked
+    if TokenService.is_token_revoked(db, token):
+        raise credentials_exception
     
     payload = decode_access_token(token)
     if payload is None:
@@ -51,15 +56,19 @@ def register(
     Register a new user
     
     - **email**: Valid email address
+    - **username**: Unique username
     - **password**: User password (will be hashed automatically)
-    - **full_name**: Optional full name
+    - **first_name**: Optional first name
+    - **last_name**: Optional last name
     """
     from app.schemas.user import UserCreate
     
     user_create = UserCreate(
         email=user_in.email,
+        username=user_in.username,
         password=user_in.password,
-        full_name=user_in.full_name
+        first_name=user_in.first_name,
+        last_name=user_in.last_name
     )
     
     user = UserService.create_user(db, user_create)
@@ -89,6 +98,10 @@ def login(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     
+    # Save token to database
+    expires_at = datetime.now(timezone.utc) + access_token_expires
+    TokenService.save_token(db, user.user_id, access_token, expires_at)
+    
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -100,8 +113,9 @@ def login_form(
     """
     OAuth2 compatible login (for Swagger UI docs)
     
-    Uses form data instead of JSON
+    Uses form data instead of JSON - username field accepts email or username
     """
+    # Try to authenticate with email or username
     user = UserService.authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
@@ -115,6 +129,10 @@ def login_form(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
     
+    # Save token to database
+    expires_at = datetime.now(timezone.utc) + access_token_expires
+    TokenService.save_token(db, user.user_id, access_token, expires_at)
+    
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -126,3 +144,17 @@ def get_me(current_user: User = Depends(get_current_user)):
     Requires valid JWT token in Authorization header
     """
     return current_user
+
+
+@router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
+def logout(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+):
+    """
+    Logout - revoke the current token
+    
+    Requires valid JWT token in Authorization header
+    """
+    TokenService.revoke_token(db, token)
+    return None

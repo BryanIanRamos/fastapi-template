@@ -87,7 +87,7 @@ Server runs at: `http://localhost:8000`
 alembic init alembic
 
 # Re-init Alembic with the template env.py (safe after deleting alembic/)
-# .\scripts\setup_alembic.ps1 -Force
+.\scripts\setup_alembic.ps1 -Force
 
 # Create migration
 alembic revision -m "description" --autogenerate
