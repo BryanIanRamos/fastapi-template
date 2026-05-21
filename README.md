@@ -98,18 +98,71 @@ alembic revision -m "description" --autogenerate
 
 # Apply migrations
 alembic upgrade head
+```
+
+## Database Seeding (Laravel Style)
+
+Seed your database with sample data using the seeding system:
+
+```powershell
+# Seed all tables (skips if already seeded)
+python seed.py
+
+# Same as above
+python seed.py --all
+
+# Seed only specific table
+python seed.py --table users
+python seed.py --table profiles
+python seed.py --table tasks
+
+# Clear specific table and reseed it
+python seed.py --table users --fresh
+
+# 🔄 Clear ALL tables and reseed everything from scratch
+python seed.py --reset
+
+# List available seeders
+python seed.py --list
+```
+
+### Seeding Commands Reference
+
+| Command                                | Behavior                                   |
+| -------------------------------------- | ------------------------------------------ |
+| `python seed.py`                       | Seeds all tables (skips if already seeded) |
+| `python seed.py --all`                 | Seeds all tables (same as above)           |
+| `python seed.py --table users`         | Seeds only users table                     |
+| `python seed.py --table users --fresh` | Clears users table, then reseeds it        |
+| `python seed.py --reset`               | Clears ALL tables and reseeds everything   |
+| `python seed.py --list`                | Lists available seeders                    |
+
+### Available Seeders
+
+- `users` - User accounts with sample credentials
+- `profiles` - User profiles with contact info
+- `tasks` - Task items with different statuses
+- `tourist_areas` - Tourist destination locations
+- `activities` - Activities at each tourist area
+- `reviews` - Reviews of tourist areas
+- `visits` - Visit analytics/records
+- `vectors` - Vector embeddings for areas
 
 # Downgrade
+
 alembic downgrade -1
 
 # Fresh migrate (drops all tables, data loss)
+
 alembic downgrade base
 alembic upgrade head
 
 # Reset database schema (Postgres, data loss)
+
 psql "$env:DATABASE_URL" -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"
 alembic upgrade head
-```
+
+````
 
 ## Architecture Layers
 
@@ -132,4 +185,4 @@ DATABASE_URL=sqlite:///./app.db
 API_V1_STR=/api/v1                 # API v1 prefix
 PROJECT_NAME=FastAPI Server        # Project name
 DEBUG=True                          # Debug mode
-```
+````
