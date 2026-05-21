@@ -89,6 +89,10 @@ alembic init alembic
 # Re-init Alembic with the template env.py (safe after deleting alembic/)
 .\scripts\setup_alembic.ps1 -Force
 
+# ⚠️ ONLY use if database already exists or was manually created
+# Align Alembic version with existing DB schema (no schema changes)
+alembic stamp head
+
 # Create migration
 alembic revision -m "description" --autogenerate
 
