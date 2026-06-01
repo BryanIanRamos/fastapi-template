@@ -13,7 +13,7 @@ class TourGuideService:
 
     def __init__(
         self,
-        llm_model: str = "gemma2",
+        llm_model: str = "gemma4",
         llm_temperature: float = 0.2,
         llm_base_url: str = "http://localhost:11434",
     ):
