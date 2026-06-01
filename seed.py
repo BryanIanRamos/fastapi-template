@@ -13,6 +13,7 @@ from app.db.seeders import (
     ProfileSeeder,
     TouristAreaVectorSeeder,
 )
+from app.models import Token, Session
 
 # Mapping of table names to seeder classes
 SEEDERS = {
@@ -59,12 +60,14 @@ def clear_table(db: Session, table_name: str):
     """Clear (truncate) a table"""
     from app.models import (
         User, TouristArea, AreaActivity, TouristReview, TouristVisit,
-        Task, Profile, TouristAreaVector
+        Task, Profile, TouristAreaVector, Token, Session as SessionModel
     )
     
     model_map = {
         "users": User,
         "profiles": Profile,
+        "tokens": Token,
+        "sessions": SessionModel,
         "tasks": Task,
         "tourist_areas": TouristArea,
         "activities": AreaActivity,
@@ -95,14 +98,17 @@ def fresh_seed(db: Session, table_name: str):
 def reset_all(db: Session):
     """Clear ALL tables and reseed from scratch (like Laravel migrate:fresh --seed)"""
     print("🔄 Resetting database (deleting all data)...\n")
-    order = ["users", "profiles", "tasks", "tourist_areas", "activities", "reviews", "visits", "vectors"]
+    # Order matters: clear in reverse order to respect foreign key constraints
+    # Dependencies: sessions -> (tokens + users), tokens -> users, profiles -> users, tasks -> users
+    clear_order = ["vectors", "visits", "reviews", "activities", "tourist_areas", "tasks", "sessions", "tokens", "profiles", "users"]
+    seed_order = ["users", "profiles", "tokens", "sessions", "tasks", "tourist_areas", "activities", "reviews", "visits", "vectors"]
     
-    # Clear all tables in reverse order (respecting foreign keys)
-    for table in reversed(order):
+    # Clear all tables in reverse dependency order
+    for table in clear_order:
         clear_table(db, table)
     
     print("\n🌱 Reseeding all tables...\n")
-    for table in order:
+    for table in seed_order:
         seed_table(db, table)
         print()
 
@@ -143,6 +149,7 @@ def main():
         print("Available seeders:")
         for name in SEEDERS.keys():
             print(f"  - {name}")
+        print("\nNote: tokens and sessions tables exist but are auto-managed (not manually seeded)")
         return
     
     db = get_db()

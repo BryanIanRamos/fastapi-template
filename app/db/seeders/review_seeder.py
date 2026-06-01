@@ -1,45 +1,38 @@
 """Review seeder"""
+import sys
+from pathlib import Path
+
 from app.db.seeders.base_seeder import BaseSeeder
-from app.db.factories.factory import fake
 from app.models.tourist_review import TouristReview
-from app.models.tourist_area import TouristArea
+
+# Add project root to path so we can import CARAGA_SEED_DATA
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
+from CARAGA_SEED_DATA import TOURIST_REVIEWS
 
 
 class ReviewSeeder(BaseSeeder):
-    """Seed tourist_reviews table"""
+    """Seed tourist_reviews table with Caraga reviews"""
     
     def run(self):
-        """Create sample reviews"""
+        """Create sample reviews from hardcoded data"""
         if self.count(TouristReview) > 0:
             print("⏭️  Reviews table already seeded, skipping...")
             return
         
-        areas = self.db.query(TouristArea).all()
-        if not areas:
-            print("⚠️  No tourist areas found. Seed tourist areas first.")
-            return
-        
         reviews = []
         
-        # Example 1: One custom hardcoded review
-        reviews.append(TouristReview(
-            area_id=areas[0].area_id,
-            user_name="John Smith",
-            rating=5,
-            comment="Amazing experience! Highly recommended.",
-        ))
-        
-        # Example 2: Generate 20 random reviews with Faker (change the range(20) to generate more)
-        for _ in range(20):
+        # Add all reviews from hardcoded data
+        # IMPORTANT: Use explicit IDs to match foreign key constraints
+        for review_data in TOURIST_REVIEWS:
             reviews.append(TouristReview(
-                area_id=fake.integer(min=areas[0].area_id, max=areas[-1].area_id),
-                user_name=fake.name(),
-                rating=fake.rating(min=3, max=5),
-                comment=fake.paragraph(nb_sentences=2),
+                review_id=review_data["review_id"],  # Explicitly set review_id
+                area_id=review_data["area_id"],
+                user_name=review_data["user_name"],
+                rating=review_data["rating"],
+                comment=review_data["comment"],
             ))
-        
-        # TODO: Add more reviews here by adding more loops or custom entries above
         
         self.db.add_all(reviews)
         self.db.commit()
-        print(f"✅ Seeded {len(reviews)} reviews")
+        print(f"✅ Seeded {len(reviews)} Caraga reviews")

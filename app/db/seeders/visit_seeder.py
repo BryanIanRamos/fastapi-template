@@ -1,48 +1,38 @@
 """Visit seeder for analytics"""
-from random import choice
-from datetime import datetime, timedelta
+import sys
+from pathlib import Path
+
 from app.db.seeders.base_seeder import BaseSeeder
-from app.db.factories.factory import fake
 from app.models.tourist_visit import TouristVisit
-from app.models.tourist_area import TouristArea
+
+# Add project root to path so we can import CARAGA_SEED_DATA
+project_root = Path(__file__).parent.parent.parent.parent
+sys.path.insert(0, str(project_root))
+from CARAGA_SEED_DATA import TOURIST_VISITS
 
 
 class VisitSeeder(BaseSeeder):
-    """Seed tourist_visits table for analytics"""
+    """Seed tourist_visits table for analytics with Caraga data"""
     
     def run(self):
-        """Create sample visits"""
+        """Create sample visits from hardcoded data"""
         if self.count(TouristVisit) > 0:
             print("⏭️  Visits table already seeded, skipping...")
             return
         
-        areas = self.db.query(TouristArea).all()
-        if not areas:
-            print("⚠️  No tourist areas found. Seed tourist areas first.")
-            return
-        
-        sources = ["google", "tripadvisor", "instagram", "website", "friend_recommendation", "mobile_app"]
         visits = []
         
-        # Example 1: One custom hardcoded visit
-        visits.append(TouristVisit(
-            area_id=areas[0].area_id,
-            user_id=1,
-            source="google",
-            visit_time=datetime.now() - timedelta(days=5),
-        ))
-        
-        # Example 2: Generate 50 random visits with Faker (change the range(50) to generate more)
-        for _ in range(50):
+        # Add all visits from hardcoded data
+        # IMPORTANT: Use explicit IDs to match foreign key constraints
+        for visit_data in TOURIST_VISITS:
             visits.append(TouristVisit(
-                area_id=fake.integer(min=areas[0].area_id, max=areas[-1].area_id),
-                user_id=fake.integer(min=1, max=100),
-                source=choice(sources),
-                visit_time=datetime.now() - timedelta(days=fake.integer(min=0, max=30)),
+                visit_id=visit_data["visit_id"],  # Explicitly set visit_id
+                area_id=visit_data["area_id"],
+                user_id=visit_data["user_id"],
+                source=visit_data["source"],
+                visit_time=visit_data["visit_time"],
             ))
-        
-        # TODO: Add more visits here by adding more loops or custom entries above
         
         self.db.add_all(visits)
         self.db.commit()
-        print(f"✅ Seeded {len(visits)} visits")
+        print(f"✅ Seeded {len(visits)} Caraga visits")
