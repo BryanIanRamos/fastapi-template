@@ -24,6 +24,10 @@ def list_tasks(
     - **skip**: Number of tasks to skip (pagination)
     - **limit**: Maximum number of tasks to return
     - **status_filter**: Filter by status (pending, in_progress, completed)
+
+    Example:
+        GET /api/v1/tasks/?status_filter=pending
+        Header: Authorization: Bearer <your_token_here>
     """
     if status_filter:
         tasks = TaskService.get_by_status(db, current_user.id, status_filter)
@@ -44,6 +48,15 @@ def create_task(
     - **title**: Task title (required)
     - **description**: Task description (optional)
     - **status**: Task status - pending, in_progress, or completed (default: pending)
+
+    Example:
+        POST /api/v1/tasks/
+        Header: Authorization: Bearer <your_token_here>
+        {
+            "title": "Finish Report",
+            "description": "Complete the quarterly financial report",
+            "status": "pending"
+        }
     """
     task = TaskService.create(db, task_in, current_user.id)
     return task
@@ -58,6 +71,10 @@ def get_task_stats(
     Get task statistics for current user
     
     Returns count of tasks by status
+
+    Example:
+        GET /api/v1/tasks/stats
+        Header: Authorization: Bearer <your_token_here>
     """
     stats = TaskService.count_by_status(db, current_user.id)
     return {
@@ -77,6 +94,10 @@ def get_task(
     Get task by ID
     
     - **task_id**: ID of the task to retrieve
+
+    Example:
+        GET /api/v1/tasks/1
+        Header: Authorization: Bearer <your_token_here>
     """
     task = TaskService.get_by_id(db, task_id, current_user.id)
     if not task:
@@ -112,6 +133,10 @@ def delete_task(
     Delete task by ID
     
     - **task_id**: ID of the task to delete
+
+    Example:
+        DELETE /api/v1/tasks/1
+        Header: Authorization: Bearer <your_token_here>
     """
     TaskService.delete(db, task_id, current_user.id)
     return None

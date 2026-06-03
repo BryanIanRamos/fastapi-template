@@ -4,6 +4,8 @@ from typing import Any
 from jose import jwt
 from passlib.context import CryptContext
 from app.core.config import settings
+import secrets
+import hashlib
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -39,3 +41,15 @@ def decode_access_token(token: str) -> dict[str, Any] | None:
         return payload
     except jwt.JWTError:
         return None
+
+def generate_magic_token() -> str:
+    """Create secure random token"""
+    return secrets.token_urlsafe(32)
+
+
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+def verify_token(token: str, token_hash: str) -> bool:
+    return hash_token(token) == token_hash

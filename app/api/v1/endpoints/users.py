@@ -17,7 +17,12 @@ def list_users(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """List all users with pagination - requires authentication"""
+    """List all users with pagination - requires authentication
+
+    Example:
+        GET /api/v1/users/?limit=10
+        Header: Authorization: Bearer <your_token_here>
+    """
     users = UserService.get_all_users(db, skip=skip, limit=limit)
     return users
 
@@ -28,7 +33,17 @@ def create_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Create a new user - requires authentication"""
+    """Create a new user - requires authentication
+
+    Example:
+        POST /api/v1/users/
+        Header: Authorization: Bearer <your_token_here>
+        {
+            "email": "newuser@example.com",
+            "username": "newuser",
+            "password": "password123"
+        }
+    """
     user = UserService.create_user(db, user_in)
     return user
 
@@ -39,7 +54,12 @@ def get_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Get user by ID - requires authentication"""
+    """Get user by ID - requires authentication
+
+    Example:
+        GET /api/v1/users/1
+        Header: Authorization: Bearer <your_token_here>
+    """
     user = UserService.get_user_by_id(db, user_id)
     if not user:
         from fastapi import HTTPException
@@ -54,7 +74,15 @@ def update_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Update user by ID - requires authentication"""
+    """Update user by ID - requires authentication
+
+    Example:
+        PUT /api/v1/users/1
+        Header: Authorization: Bearer <your_token_here>
+        {
+            "first_name": "UpdatedName"
+        }
+    """
     user = UserService.update_user(db, user_id, user_in)
     return user
 
@@ -65,6 +93,11 @@ def delete_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete user by ID - requires authentication"""
+    """Delete user by ID - requires authentication
+
+    Example:
+        DELETE /api/v1/users/1
+        Header: Authorization: Bearer <your_token_here>
+    """
     UserService.delete_user(db, user_id)
     return None

@@ -1,7 +1,9 @@
 from datetime import timedelta, datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 from app.api.deps import get_db
 from app.core.security import create_access_token, decode_access_token
@@ -10,9 +12,19 @@ from app.schemas.auth import Token, UserLogin, UserRegister
 from app.schemas.user import UserRead
 from app.services.user_service import UserService
 from app.services.token_service import TokenService
+from app.services.auth_service import create_magic_link, verify_magic_link
+from app.models.user import User
+from app.schemas.auth import Token, UserLogin, UserRegister
+from app.schemas.user import UserRead
+from app.services.user_service import UserService
+from app.services.token_service import TokenService
+from app.services.auth_service import create_magic_link, verify_magic_link
 from app.models.user import User
 
 router = APIRouter()
+
+class MagicLinkRequest(BaseModel):
+    email: str
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 
@@ -60,6 +72,16 @@ def register(
     - **password**: User password (will be hashed automatically)
     - **first_name**: Optional first name
     - **last_name**: Optional last name
+
+    Example:
+        POST /api/v1/auth/register
+        {
+            "email": "user@example.com",
+            "username": "johndoe",
+            "password": "securepassword123",
+            "first_name": "John",
+            "last_name": "Doe"
+        }
     """
     from app.schemas.user import UserCreate
     
@@ -84,6 +106,13 @@ def login(
     Login with email and password
     
     Returns JWT access token for authentication
+
+    Example:
+        POST /api/v1/auth/login
+        {
+            "email": "user@example.com",
+            "password": "securepassword123"
+        }
     """
     user = UserService.authenticate_user(db, user_credentials.email, user_credentials.password)
     if not user:
@@ -158,3 +187,65 @@ def logout(
     """
     TokenService.revoke_token(db, token)
     return None
+
+
+@router.post("/magic-link", response_model=dict)
+def request_magic_link(
+    request: MagicLinkRequest, 
+    db: Session = Depends(get_db)
+):
+    """
+    Request a passwordless magic link login
+    
+    - **email**: User's email address
+    
+    Example:
+        POST /api/v1/auth/magic-link
+        {
+            "email": "user@example.com"
+        }
+    """
+    # Use the base URL from settings if available, otherwise fallback to localhost
+    base_url = getattr(settings, "BASE_URL", "http://localhost:8000")
+    return create_magic_link(db, request.email, base_url)
+
+
+@router.get("/verify-magic-link", response_model=Token)
+def verify_magic_link_route(
+    token: str, 
+    db: Session = Depends(get_db)
+):
+    """
+    Verify magic link and redirect to frontend with JWT
+    
+    - **token**: The secure token from the email link
+    
+    Example:
+        GET /api/v1/auth/verify-magic-link?token=xyz123...
+    """
+    email = verify_magic_link(db, token)
+
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Invalid or expired magic link"
+        )
+
+    # Generate JWT access token
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": email}, 
+        expires_delta=access_token_expires
+    )
+
+    # Save token to database for tracking/revocation
+    user = UserService.get_user_by_email(db, email=email)
+    if user:
+        expires_at = datetime.now(timezone.utc) + access_token_expires
+        TokenService.save_token(db, user.user_id, access_token, expires_at)
+
+    # Redirect to frontend with token in query parameter
+    frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:3000/auth-callback")
+    redirect_url = f"{frontend_url}?token={access_token}"
+    
+    return RedirectResponse(url=redirect_url)
