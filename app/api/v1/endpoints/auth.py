@@ -23,8 +23,8 @@ from app.models.user import User
 
 router = APIRouter()
 
-class MagicLinkRequest(BaseModel):
-    email: str
+# class MagicLinkRequest(BaseModel):
+#     email: str
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 
@@ -189,63 +189,64 @@ def logout(
     return None
 
 
-@router.post("/magic-link", response_model=dict)
-def request_magic_link(
-    request: MagicLinkRequest, 
-    db: Session = Depends(get_db)
-):
-    """
-    Request a passwordless magic link login
-    
-    - **email**: User's email address
-    
-    Example:
-        POST /api/v1/auth/magic-link
-        {
-            "email": "user@example.com"
-        }
-    """
-    # Use the base URL from settings if available, otherwise fallback to localhost
-    base_url = getattr(settings, "BASE_URL", "http://localhost:8000")
-    return create_magic_link(db, request.email, base_url)
+# @router.post("/magic-link", response_model=dict)
+# def request_magic_link(
+#     request: MagicLinkRequest, 
+#     db: Session = Depends(get_db)
+# ):
+#     """
+#     Request a passwordless magic link login
+#     
+#     - **email**: User's email address
+#     
+#     Example:
+#         POST /api/v1/auth/magic-link
+#         {
+#             "email": "user@example.com"
+#         }
+#     """
+#     # Use the base URL from settings if available, otherwise fallback to localhost
+#     base_url = getattr(settings, "BASE_URL", "http://localhost:8000")
+#     return create_magic_link(db, request.email, base_url)
 
 
-@router.get("/verify-magic-link", response_model=Token)
-def verify_magic_link_route(
-    token: str, 
-    db: Session = Depends(get_db)
-):
-    """
-    Verify magic link and redirect to frontend with JWT
-    
-    - **token**: The secure token from the email link
-    
-    Example:
-        GET /api/v1/auth/verify-magic-link?token=xyz123...
-    """
-    email = verify_magic_link(db, token)
-
-    if not email:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail="Invalid or expired magic link"
-        )
-
-    # Generate JWT access token
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": email}, 
-        expires_delta=access_token_expires
-    )
-
-    # Save token to database for tracking/revocation
-    user = UserService.get_user_by_email(db, email=email)
-    if user:
-        expires_at = datetime.now(timezone.utc) + access_token_expires
-        TokenService.save_token(db, user.user_id, access_token, expires_at)
-
-    # Redirect to frontend with token in query parameter
-    frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:3000/auth-callback")
-    redirect_url = f"{frontend_url}?token={access_token}"
-    
-    return RedirectResponse(url=redirect_url)
+# @router.get("/verify-magic-link", response_model=Token)
+# def verify_magic_link_route(
+#     token: str, 
+#     db: Session = Depends(get_db)
+# ):
+#     """
+#     Verify magic link and redirect to frontend with JWT
+#     
+#     - **token**: The secure token from the email link
+#     
+#     Example:
+#         GET /api/v1/auth/verify-magic-link?token=xyz123...
+#     """
+#     email = verify_magic_link(db, token)
+# 
+#     if not email:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST, 
+#             detail="Invalid or expired magic link"
+#         )
+# 
+#     # Generate JWT access token
+#     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+#     access_token = create_access_token(
+#         data={"sub": email}, 
+#         expires_delta=access_token_expires
+#     )
+# 
+#     # Save token to database for tracking/revocation
+#     user = UserService.get_user_by_email(db, email=email)
+#     if user:
+#         expires_at = datetime.now(timezone.utc) + access_token_expires
+#         TokenService.save_token(db, user.user_id, access_token, expires_at)
+# 
+#     # Redirect to frontend with token in query parameter
+#     # frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:3000/auth-callback")
+#     frontend_url = getattr(settings, "FRONTEND_URL", "https://bryan-ramos-phi.vercel.app/")
+#     redirect_url = f"{frontend_url}?token={access_token}"
+#     
+#     return RedirectResponse(url=redirect_url)
