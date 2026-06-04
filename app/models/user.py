@@ -1,6 +1,7 @@
 from uuid import uuid4
-from sqlalchemy import Column, String, DateTime, Integer, UniqueConstraint, func
+from sqlalchemy import Column, String, DateTime, Integer, UniqueConstraint, func, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import relationship
 from app.db.base import Base
 
 
@@ -23,6 +24,10 @@ class User(Base):
     verified_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    # Relationships
+    otp_tokens = relationship("OTPToken", back_populates="user", cascade="all, delete-orphan")
+    magic_links = relationship("MagicLinkToken", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User(user_id={self.user_id}, username={self.username}, email={self.email})>"

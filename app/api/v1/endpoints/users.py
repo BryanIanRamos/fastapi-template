@@ -19,6 +19,9 @@ def list_users(
 ):
     """List all users with pagination - requires authentication
 
+    - **skip**: Number of users to skip (pagination)
+    - **limit**: Maximum number of users to return
+
     Example:
         GET /api/v1/users/?limit=10
         Header: Authorization: Bearer <your_token_here>
@@ -34,6 +37,12 @@ def create_user(
     current_user: User = Depends(get_current_user),
 ):
     """Create a new user - requires authentication
+
+    - **email**: Valid email address
+    - **username**: Unique username
+    - **password**: User password
+    - **first_name**: Optional first name
+    - **last_name**: Optional last name
 
     Example:
         POST /api/v1/users/
@@ -56,6 +65,8 @@ def get_user(
 ):
     """Get user by ID - requires authentication
 
+    - **user_id**: The ID of the user to retrieve
+
     Example:
         GET /api/v1/users/1
         Header: Authorization: Bearer <your_token_here>
@@ -76,6 +87,9 @@ def update_user(
 ):
     """Update user by ID - requires authentication
 
+    - **user_id**: The ID of the user to update
+    - **user_in**: User data to update (all fields optional)
+
     Example:
         PUT /api/v1/users/1
         Header: Authorization: Bearer <your_token_here>
@@ -94,6 +108,8 @@ def delete_user(
     current_user: User = Depends(get_current_user),
 ):
     """Delete user by ID - requires authentication
+
+    - **user_id**: The ID of the user to delete
 
     Example:
         DELETE /api/v1/users/1

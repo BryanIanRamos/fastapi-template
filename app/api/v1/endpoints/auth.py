@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from typing import Optional
 
 from app.api.deps import get_db
 from app.core.security import create_access_token, decode_access_token
@@ -12,19 +13,31 @@ from app.schemas.auth import Token, UserLogin, UserRegister
 from app.schemas.user import UserRead
 from app.services.user_service import UserService
 from app.services.token_service import TokenService
-# from app.services.auth_service import create_magic_link, verify_magic_link
+from app.services.auth_service import create_magic_link, verify_magic_link
+from app.services.otp_service import OTPService
 from app.models.user import User
 from app.schemas.auth import Token, UserLogin, UserRegister
 from app.schemas.user import UserRead
 from app.services.user_service import UserService
 from app.services.token_service import TokenService
-# from app.services.auth_service import create_magic_link, verify_magic_link
+from app.services.auth_service import create_magic_link, verify_magic_link
+from app.services.otp_service import OTPService
 from app.models.user import User
 
 router = APIRouter()
 
 # class MagicLinkRequest(BaseModel):
 #     email: str
+
+class OTPRequest(BaseModel):
+    email: str
+    purpose: str # 'registration' or 'password_reset'
+
+class OTPVerifyRequest(BaseModel):
+    email: str
+    token: str
+    purpose: str # 'registration' or 'password_reset'
+    password: Optional[str] = None # Required for password reset
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
 
@@ -105,6 +118,9 @@ def login(
     """
     Login with email and password
     
+    - **email**: User email address
+    - **password**: User password
+
     Returns JWT access token for authentication
 
     Example:
@@ -143,6 +159,12 @@ def login_form(
     OAuth2 compatible login (for Swagger UI docs)
     
     Uses form data instead of JSON - username field accepts email or username
+
+    Example:
+        POST /api/v1/auth/login/form
+        Form Data:
+            username: "user@example.com"
+            password: "securepassword123"
     """
     # Try to authenticate with email or username
     user = UserService.authenticate_user(db, form_data.username, form_data.password)
@@ -171,6 +193,10 @@ def get_me(current_user: User = Depends(get_current_user)):
     Get current authenticated user
     
     Requires valid JWT token in Authorization header
+
+    Example:
+        GET /api/v1/auth/me
+        Header: Authorization: Bearer <your_token_here>
     """
     return current_user
 
@@ -184,69 +210,79 @@ def logout(
     Logout - revoke the current token
     
     Requires valid JWT token in Authorization header
+
+    Example:
+        POST /api/v1/auth/logout
+        Header: Authorization: Bearer <your_token_here>
     """
     TokenService.revoke_token(db, token)
     return None
 
 
-# @router.post("/magic-link", response_model=dict)
-# def request_magic_link(
-#     request: MagicLinkRequest, 
-#     db: Session = Depends(get_db)
-# ):
-#     """
-#     Request a passwordless magic link login
-#     
-#     - **email**: User's email address
-#     
-#     Example:
-#         POST /api/v1/auth/magic-link
-#         {
-#             "email": "user@example.com"
-#         }
-#     """
-#     # Use the base URL from settings if available, otherwise fallback to localhost
-#     base_url = getattr(settings, "BASE_URL", "http://localhost:8000")
-#     return create_magic_link(db, request.email, base_url)
+@router.post("/otp/request")
+def request_otp(
+    request: OTPRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Request an OTP for registration or password reset
+    
+    - **email**: Valid email address
+    - **purpose**: 'registration' or 'password_reset'
+
+    Example:
+        POST /api/v1/auth/otp/request
+        {
+            "email": "user@example.com",
+            "purpose": "registration"
+        }
+    """
+    if request.purpose not in ['registration', 'password_reset']:
+        raise HTTPException(status_code=400, detail="Invalid purpose. Use 'registration' or 'password_reset'")
+    
+    otp = OTPService.generate_otp(request.email, request.purpose, db)
+    return {"message": f"OTP sent to {request.email} for {request.purpose}"}
 
 
-# @router.get("/verify-magic-link", response_model=Token)
-# def verify_magic_link_route(
-#     token: str, 
-#     db: Session = Depends(get_db)
-# ):
-#     """
-#     Verify magic link and redirect to frontend with JWT
-#     
-#     - **token**: The secure token from the email link
-#     
-#     Example:
-#         GET /api/v1/auth/verify-magic-link?token=xyz123...
-#     """
-#     email = verify_magic_link(db, token)
-# 
-#     if not email:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST, 
-#             detail="Invalid or expired magic link"
-#         )
-# 
-#     # Generate JWT access token
-#     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-#     access_token = create_access_token(
-#         data={"sub": email}, 
-#         expires_delta=access_token_expires
-#     )
-# 
-#     # Save token to database for tracking/revocation
-#     user = UserService.get_user_by_email(db, email=email)
-#     if user:
-#         expires_at = datetime.now(timezone.utc) + access_token_expires
-#         TokenService.save_token(db, user.user_id, access_token, expires_at)
-# 
-#     # Redirect to frontend with token in query parameter
-#     # frontend_url = getattr(settings, "FRONTEND_URL", "http://localhost:3000/auth-callback")
-#     frontend_url = getattr(settings, "FRONTEND_URL", "https://bryan-ramos-phi.vercel.app/")
-#     redirect_url = f"{frontend_url}?token={access_token}"
-#     
-#     return RedirectResponse(url=redirect_url)
+@router.post("/otp/verify")
+def verify_otp(
+    request: OTPVerifyRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Verify OTP and perform action (registration or password reset)
+    
+    - **email**: User email address
+    - **token**: The OTP token received
+    - **purpose**: 'registration' or 'password_reset'
+    - **password**: Required if purpose is 'password_reset'
+
+    Example:
+        POST /api/v1/auth/otp/verify
+        {
+            "email": "user@example.com",
+            "token": "123456",
+            "purpose": "password_reset",
+            "password": "newsecurepassword123"
+        }
+    """
+    is_valid = OTPService.verify_otp(request.email, request.token, request.purpose, db)
+    
+    if not is_valid:
+        raise HTTPException(status_code=400, detail="Invalid or expired OTP")
+
+    if request.purpose == 'password_reset':
+        if not request.password:
+            raise HTTPException(status_code=400, detail="Password is required for password reset")
+        
+        user = UserService.get_user_by_email(db, email=request.email)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        
+        UserService.update_password(db, user, request.password)
+        return {"message": "Password has been successfully reset"}
+
+    if request.purpose == 'registration':
+        return {"message": "OTP verified. You can now proceed to complete registration."}
+
+    return {"message": "OTP verified successfully"}

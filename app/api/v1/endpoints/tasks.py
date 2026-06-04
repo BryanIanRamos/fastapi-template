@@ -117,7 +117,14 @@ def update_task(
     Update task by ID
     
     - **task_id**: ID of the task to update
-    - All fields are optional, only provided fields will be updated
+    - **task_in**: Task data to update (all fields optional)
+
+    Example:
+        PUT /api/v1/tasks/1
+        Header: Authorization: Bearer <your_token_here>
+        {
+            "description": "Updated description"
+        }
     """
     task = TaskService.update(db, task_id, task_in, current_user.id)
     return task
