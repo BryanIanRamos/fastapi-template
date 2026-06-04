@@ -26,7 +26,7 @@ def create_magic_link(db: Session, email: str, base_url: str):
     db.add(record)
     db.commit()
 
-    link = f"{base_url}/auth/verify-magic-link?token={token}"
+    link = f"{base_url}/api/v1/auth/verify-magic-link?token={token}"
 
     try:
         send_email(
