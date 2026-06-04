@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     # App Settings
     BASE_URL: str = "http://localhost:8000"
     
+    # AI Settings
+    OLLAMA_MODEL: str = "gemma4"
+    OLLAMA_TEMPERATURE: float = 0.2
+    OLLAMA_BASE_URL: str = "http://localhost:11434"
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

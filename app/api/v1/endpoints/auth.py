@@ -12,13 +12,13 @@ from app.schemas.auth import Token, UserLogin, UserRegister
 from app.schemas.user import UserRead
 from app.services.user_service import UserService
 from app.services.token_service import TokenService
-from app.services.auth_service import create_magic_link, verify_magic_link
+# from app.services.auth_service import create_magic_link, verify_magic_link
 from app.models.user import User
 from app.schemas.auth import Token, UserLogin, UserRegister
 from app.schemas.user import UserRead
 from app.services.user_service import UserService
 from app.services.token_service import TokenService
-from app.services.auth_service import create_magic_link, verify_magic_link
+# from app.services.auth_service import create_magic_link, verify_magic_link
 from app.models.user import User
 
 router = APIRouter()

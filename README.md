@@ -75,7 +75,7 @@ Server runs at: `http://localhost:8000`
 ### Health
 
 - `GET /` - Welcome message
-- `GET /health` - Health check
+- `GET /health` - Health checkP
 
 ## Database Migrations (Alembic)
 

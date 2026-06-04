@@ -6,6 +6,7 @@ Uses LangChain with ChatOllama (or other LLM providers)
 from typing import List, Dict, Any, Optional
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_community.chat_models import ChatOllama
+from app.core.config import settings
 
 
 class TourGuideService:
@@ -13,9 +14,9 @@ class TourGuideService:
 
     def __init__(
         self,
-        llm_model: str = "gemma4",
-        llm_temperature: float = 0.2,
-        llm_base_url: str = "http://localhost:11434",
+        llm_model: str = settings.OLLAMA_MODEL,
+        llm_temperature: float = settings.OLLAMA_TEMPERATURE,
+        llm_base_url: str = settings.OLLAMA_BASE_URL,
     ):
         """
         Initialize tour guide service
