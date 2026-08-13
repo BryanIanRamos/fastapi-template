@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     
     PROJECT_NAME: str = "FastAPI Server"
     API_V1_STR: str = "/api/v1"
-    DATABASE_URL: str = "sqlite:///./app.db"
+    DATABASE_URL: str = "postgresql+psycopg2://user:password@localhost:5432/dbname"
     DEBUG: bool = False
     
     # JWT Settings

@@ -9,30 +9,31 @@ class TaskService:
     """Task business logic service - Example CRUD operations"""
 
     @staticmethod
-    def get_by_id(db: Session, task_id: int, user_id: int) -> Task | None:
-        """Get task by ID (only user's own tasks)"""
-        return db.query(Task).filter(
-            Task.id == task_id,
-            Task.user_id == user_id
-        ).first()
+    def get_by_id(db: Session, task_id: int, user_id: int | None = None) -> Task | None:
+        """Get task by ID (optionally filter by user)"""
+        query = db.query(Task).filter(Task.id == task_id)
+        if user_id:
+            query = query.filter(Task.user_id == user_id)
+        return query.first()
 
     @staticmethod
-    def get_all(db: Session, user_id: int, skip: int = 0, limit: int = 100) -> list[Task]:
-        """Get all tasks for a user with pagination"""
-        return db.query(Task).filter(
-            Task.user_id == user_id
-        ).offset(skip).limit(limit).all()
+    def get_all(db: Session, user_id: int | None = None, skip: int = 0, limit: int = 100) -> list[Task]:
+        """Get all tasks (optionally filter by user) with pagination"""
+        query = db.query(Task)
+        if user_id:
+            query = query.filter(Task.user_id == user_id)
+        return query.offset(skip).limit(limit).all()
 
     @staticmethod
-    def get_by_status(db: Session, user_id: int, status: str) -> list[Task]:
-        """Get tasks by status"""
-        return db.query(Task).filter(
-            Task.user_id == user_id,
-            Task.status == status
-        ).all()
+    def get_by_status(db: Session, status: str, user_id: int | None = None) -> list[Task]:
+        """Get tasks by status (optionally filter by user)"""
+        query = db.query(Task).filter(Task.status == status)
+        if user_id:
+            query = query.filter(Task.user_id == user_id)
+        return query.all()
 
     @staticmethod
-    def create(db: Session, task_in: TaskCreate, user_id: int) -> Task:
+    def create(db: Session, task_in: TaskCreate, user_id: int | None = None) -> Task:
         """Create a new task"""
         try:
             db_task = Task(
@@ -43,11 +44,11 @@ class TaskService:
             db.commit()
             db.refresh(db_task)
             return db_task
-        except IntegrityError:
+        except IntegrityError as e:
             db.rollback()
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Error creating task",
+                detail=f"Error creating task: {str(e)}",
             )
 
     @staticmethod

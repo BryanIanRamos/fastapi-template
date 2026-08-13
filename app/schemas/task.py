@@ -25,7 +25,7 @@ class TaskUpdate(BaseModel):
 class TaskRead(TaskBase):
     """Schema for reading a task - includes DB fields"""
     id: int
-    user_id: UUID
+    user_id: UUID | None
     created_at: datetime
     updated_at: datetime
 
